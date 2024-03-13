@@ -1,10 +1,11 @@
-﻿using Domain.Clients.DTOs.Response;
-using Domain.Clients;
+﻿using Domain.Clients;
 using MediatR;
+using Mapster;
+using Route = Domain.Models.Route;
 
 namespace Application.Queries;
 
-public class GetRouteQueryHandler : IRequestHandler<GetRouteQuery, GetRouteResponseDto>
+public class GetRouteQueryHandler : IRequestHandler<GetRouteQuery, Route>
 {
     private readonly IGoogleMapsService _googleMapsService;
 
@@ -13,17 +14,18 @@ public class GetRouteQueryHandler : IRequestHandler<GetRouteQuery, GetRouteRespo
         _googleMapsService = googleMapsService;
     }
 
-    public async Task<GetRouteResponseDto> Handle(GetRouteQuery request, CancellationToken cancellationToken)
+    public async Task<Route> Handle(GetRouteQuery request, CancellationToken cancellationToken)
     {
-        var responseDto = await _googleMapsService.GetRouteAsync(request.Request);
+        var route = (await _googleMapsService.GetRouteAsync(request.Request)).Adapt<Route>();
 
-        if(responseDto == null)
-        { 
-            return new GetRouteResponseDto
+        if (route == null)
+        {
+            return new Route
             {
                 Status = "ERROR"
             };
         }
-        return responseDto;
+        route.Status = "OK";
+        return route;
     }
 }

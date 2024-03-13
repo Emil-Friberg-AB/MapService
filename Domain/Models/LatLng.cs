@@ -1,6 +1,6 @@
-﻿namespace Domain.Clients.DTOs.Shared;
+﻿namespace Domain.Models;
 
-public class LatLngDto
+public class LatLng
 {
     public double Latitude { get; set; }
     public double Longitude { get; set; }

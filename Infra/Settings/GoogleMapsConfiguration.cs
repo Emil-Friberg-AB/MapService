@@ -1,4 +1,4 @@
-﻿namespace Infras.Settings;
+﻿namespace Infra.Settings;
 
 public class GoogleMapsConfiguration
 {

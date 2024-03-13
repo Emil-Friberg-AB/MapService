@@ -4,6 +4,7 @@ using Domain.Clients;
 using Domain.Clients.DTOs.Request;
 using Domain.Clients.DTOs.Response;
 using Domain.Models;
+using Infra.Exstentions;
 using Infra.Settings;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -29,21 +30,24 @@ public class GoogleMapsService : IGoogleMapsService
     {
         _httpClient = httpClient;
         _config = config.Value;
+        _httpClient.BaseAddress = new Uri(_config.BaseRouteUrl);
         _logger = logger;
     }
 
     public async Task<GetRouteResponseDto> GetRouteAsync(GetRouteRequestDto request)
     {
-        _logger.LogInformation("GoogleMapsClient GetRoute for lng {longitude} and lat {latitude}", request.Destination.Location.Longitude, request.Destination.Location.Latitude);
+        _logger.LogInformation("GoogleMapsClient GetRoute for lng {longitude} and lat {latitude}", request.Destination.Location.LatLng.Longitude, request.Destination.Location.LatLng.Latitude);
         var url = string.Format(_config.ComputeRouteUrl, _config.ApiKey);
-        var jsonContent = JsonConvert.SerializeObject(request);
+        var jsonContent = request.SerializeToLowercaseJson();
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
+        httpContent.Headers.Add("X-Goog-FieldMask", "routes.distanceMeters,routes.duration,routes.polyline.encodedPolyline");
         var response = await _httpClient.PostAsync(url, httpContent);
 
         if (!response.IsSuccessStatusCode)
         {
-            _logger.LogError("ERROR! GoogleMapsClient GetRoute for lng {longitude} and lat {latitude}", request.Destination.Location.Longitude, request.Destination.Location.Latitude);
+            _logger.LogError("ERROR! GoogleMapsClient GetRoute for lng {longitude} and lat {latitude}", request.Destination.Location.LatLng.Longitude, request.Destination.Location.LatLng.Latitude);
+            _logger.LogError("ERROR! Status: {status}, Reason: {reason}, Url: {url}", response.StatusCode, response.ReasonPhrase, response.RequestMessage?.RequestUri?.AbsoluteUri);
+
             return null;
         }
 
@@ -51,7 +55,7 @@ public class GoogleMapsService : IGoogleMapsService
         var routeDto = JsonConvert.DeserializeObject<GetRouteResponseDto>(jsonResponse);
         if(routeDto == null)
         {
-            _logger.LogError("ERROR! GoogleMapsClient GetRoute for lng {longitude} and lat {latitude}", request.Destination.Location.Longitude, request.Destination.Location.Latitude);
+            _logger.LogError("ERROR! GoogleMapsClient GetRoute for lng {longitude} and lat {latitude}", request.Destination.Location.LatLng.Longitude, request.Destination.Location.LatLng.Latitude);
             return null;
         }
 

@@ -1,8 +1,12 @@
 using Application.Queries;
-using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using MediatR;
-using System.Reflection;
+using Domain.Clients;
+using Mapster;
+using FastExpressionCompiler;
+using Infra.Services;
+using Infra.Settings;
+using Domain.MappingConfiguration;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,17 +18,37 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+var config = TypeAdapterConfig.GlobalSettings;
+config.Compiler = exp => exp.CompileFast();
+config.Scan(typeof(Program).Assembly);
 builder.Services.AddControllers();
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
+RouteConfiguration.Configure();
+
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(GetRouteQueryHandler).Assembly));
+builder.Services.AddScoped<IGoogleMapsService, GoogleMapsService>();
+builder.Services.Configure<GoogleMapsConfiguration>(builder.Configuration.GetSection("GoogleMapsConfiguration"));
+builder.Services.AddHttpClient<GoogleMapsService>(client =>
+{
+    var config = builder.Configuration.GetSection("GoogleMapsConfiguration").Get<GoogleMapsConfiguration>();
+    client.BaseAddress = new Uri(config.BaseRouteUrl);
+});
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "SlowDrive API", Version = "v1" });
 });
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(10);
+});
 
 // Build the application
 var app = builder.Build();
+
+// Add routing and endpoint handling
+app.UseRouting();
+
+app.MapControllers();
 
 app.UseSwagger();
 
@@ -33,6 +57,8 @@ app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "SlowDrive API V1");
+    c.RoutePrefix = string.Empty; // Serve Swagger UI at application's root
+
 });
 
 app.Run();

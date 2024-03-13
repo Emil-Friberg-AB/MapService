@@ -2,5 +2,6 @@
 
 public class PolylineDto
 {
-    public string Points { get; set; }
+    public string EncodedPolyline { get; set; }
 }
+ 

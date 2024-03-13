@@ -1,28 +1,46 @@
-﻿using Application.Queries;
+﻿using API.DTOs.Response;
+using Application.Queries;
 using Domain.Clients.DTOs.Request;
-using Domain.Clients.DTOs.Response;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Route = Domain.Models.Route;
 
-namespace API.Controllers
-{
-    [ApiController]
+namespace API.Controllers;
+
+[ApiController]
     [Route("[controller]")]
-    public class RouteController : ControllerBase
+    public class RouteController : BaseController<RouteController>
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<RouteController> _logger;
 
-        public RouteController(IMediator mediator)
+        public RouteController(IMediator mediator, ILogger<RouteController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
+        }
+
+        [HttpGet]
+        public IActionResult Get()
+        {
+            return Ok("RouteController is running");
         }
 
         [HttpPost]
-        public async Task<ActionResult<GetRouteResponseDto>> GetRoute(GetRouteRequestDto request)
+        [ProducesResponseType(typeof(RouteDto), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> GetRoute([FromBody] GetRouteRequestDto request)
         {
-            var query = new GetRouteQuery(request);
-            var result = await _mediator.Send(query);
-            return Ok(result);
+            return await TryExecuteAsync<IActionResult>(async () =>
+            {
+                var query = new GetRouteQuery(request);
+                var result = (await _mediator.Send(query)).Adapt<RouteDto>();
+                return Ok(new BaseResponseDto<RouteDto>
+                {
+                    Result = result
+                });
+            }, _logger);
         }
     }
-}

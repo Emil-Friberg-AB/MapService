@@ -2,10 +2,11 @@
 
 public class Route
 {
-    public Guid Id { get; set; }
-    public Location StartLocation { get; set; }
-    public Location EndLocation { get; set; }
-    public List<Road> Roads { get; set; }
-    public List<PointOfInterest>? PointsOfInterest { get; set; }
-    public string? Polyline { get; set; }
+    public Route()
+    {
+        RouteDetails = new List<RouteDetail>();
+    }
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public List<RouteDetail> RouteDetails { get; set; }
+    public string Status { get; set; }
 }

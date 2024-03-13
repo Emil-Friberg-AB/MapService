@@ -1,8 +1,8 @@
-﻿using Domain.Clients.DTOs.Shared;
+﻿using Domain.Models;
 
 namespace Domain.Clients.DTOs.Request;
 
 public class LocationDto
 {
-    public LatLngDto Location { get; set; }
+    public LatLng LatLng { get; set; }
 }

@@ -1,10 +1,10 @@
 ﻿using Domain.Clients.DTOs.Request;
-using Domain.Clients.DTOs.Response;
 using MediatR;
+using Route = Domain.Models.Route;
 
 namespace Application.Queries;
 
-public class GetRouteQuery : IRequest<GetRouteResponseDto>
+public class GetRouteQuery : IRequest<Route>
 {
     public GetRouteRequestDto Request { get; set; }
 

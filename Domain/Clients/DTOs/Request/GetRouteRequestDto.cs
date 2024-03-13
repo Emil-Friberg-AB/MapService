@@ -2,8 +2,8 @@
 
 public class GetRouteRequestDto
 {
-    public LocationDto Origin { get; set; }
-    public LocationDto Destination { get; set; }
+    public LocationWrapperDto Origin { get; set; }
+    public LocationWrapperDto Destination { get; set; }
     public string TravelMode { get; set; }
     public string RoutingPreference { get; set; }
     public string DepartureTime { get; set; }
