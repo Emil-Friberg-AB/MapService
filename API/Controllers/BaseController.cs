@@ -12,7 +12,7 @@ namespace API.Controllers
     public class BaseController<T> : ControllerBase
     {
         [ApiExplorerSettings(IgnoreApi = true)]
-        protected async Task<IActionResult> TryExecuteAsync<TResult>(Func<Task<TResult>> function, ILogger<T> logger) where TResult : IActionResult
+        public async Task<IActionResult> TryExecuteAsync<TResult>(Func<Task<TResult>> function, ILogger<T> logger) where TResult : IActionResult
         {
             try
             {

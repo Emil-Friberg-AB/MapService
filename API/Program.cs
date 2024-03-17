@@ -7,6 +7,8 @@ using Infra.Services;
 using Infra.Settings;
 using Domain.MappingConfiguration;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using FluentValidation.AspNetCore;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +24,9 @@ var config = TypeAdapterConfig.GlobalSettings;
 config.Compiler = exp => exp.CompileFast();
 config.Scan(typeof(Program).Assembly);
 builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation();
+
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 RouteConfiguration.Configure();
 
@@ -31,7 +36,7 @@ builder.Services.Configure<GoogleMapsConfiguration>(builder.Configuration.GetSec
 builder.Services.AddHttpClient<GoogleMapsService>(client =>
 {
     var config = builder.Configuration.GetSection("GoogleMapsConfiguration").Get<GoogleMapsConfiguration>();
-    client.BaseAddress = new Uri(config.BaseRouteUrl);
+    client.BaseAddress = new Uri(config?.BaseRouteUrl ?? string.Empty);
 });
 builder.Services.AddSwaggerGen(c =>
 {

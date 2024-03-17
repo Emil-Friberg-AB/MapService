@@ -1,6 +1,6 @@
-﻿using API.DTOs.Response;
+﻿using API.DTOs.Request;
+using API.DTOs.Response;
 using Application.Queries;
-using Domain.Clients.DTOs.Request;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +35,8 @@ namespace API.Controllers;
         {
             return await TryExecuteAsync<IActionResult>(async () =>
             {
-                var query = new GetRouteQuery(request);
+                var routeQueryRequest = request.Adapt<Domain.Clients.DTOs.Request.GetRouteRequestDto>();
+                var query = new GetRouteQuery(routeQueryRequest);
                 var result = (await _mediator.Send(query)).Adapt<RouteDto>();
                 return Ok(new BaseResponseDto<RouteDto>
                 {
