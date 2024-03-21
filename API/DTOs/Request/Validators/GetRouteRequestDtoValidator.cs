@@ -36,7 +36,7 @@ public class GetRouteRequestDtoValidator : AbstractValidator<GetRouteRequestDto>
             });
         });
 
-        RuleFor(x => x.TravelMode).Must(x => x == "DRIVING" || x == "WALKING" || x == "BICYCLING" || x == "TRANSIT");
+        RuleFor(x => x.TravelMode).Must(x => x == "DRIVE" || x == "WALKING" || x == "BICYCLING" || x == "TRANSIT");
     }
 
 }
